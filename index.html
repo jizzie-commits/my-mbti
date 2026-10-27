@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MBTI로 나와 닮은 포켓몬 찾기</title>
+  <style>
+    /* 전체 스타일 설정 (따뜻한 크림/노랑 톤) */
+    :root {
+      --bg-color: #FFFDF0;
+      --card-bg: #FFFFFF;
+      --primary-yellow: #FFE866;
+      --accent-orange: #FF9F43;
+      --text-main: #2D3436;
+      --text-muted: #636E72;
+      --border-color: #FFEAA7;
+      --shadow: 0 8px 24px rgba(255, 159, 67, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px;
+      background: var(--card-bg);
+      border: 3px solid var(--border-color);
+      border-radius: 28px;
+      padding: 36px 28px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    /* 헤더 스타일 */
+    h1 {
+      font-size: 2.2rem;
+      color: #D35400;
+      margin-bottom: 12px;
+      font-weight: 800;
+      word-break: keep-all;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      word-break: keep-all;
+    }
+
+    /* MBTI 선택 화면 */
+    .mbti-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .mbti-btn {
+      background-color: #FFF9D2;
+      border: 2px solid var(--primary-yellow);
+      border-radius: 16px;
+      padding: 16px 8px;
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #D35400;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mbti-btn:hover {
+      background-color: var(--accent-orange);
+      color: white;
+      border-color: var(--accent-orange);
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(255, 159, 67, 0.3);
+    }
+
+    /* 결과 화면 */
+    .result-card {
+      display: none;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .mbti-badge {
+      display: inline-block;
+      background-color: var(--primary-yellow);
+      color: #D35400;
+      font-weight: bold;
+      font-size: 1.3rem;
+      padding: 8px 20px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    .pokemon-emoji {
+      font-size: 7rem;
+      line-height: 1;
+      margin: 16px 0;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.1));
+    }
+
+    .pokemon-name {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 20px;
+    }
+
+    .reason-box {
+      background-color: #FFFDF0;
+      border: 2px dashed var(--border-color);
+      border-radius: 18px;
+      padding: 20px;
+      font-size: 1.2rem;
+      line-height: 1.7;
+      color: #2D3436;
+      text-align: left;
+      margin-bottom: 24px;
+      word-break: keep-all;
+    }
+
+    .match-box {
+      background-color: #FFF3E0;
+      border-radius: 16px;
+      padding: 16px 20px;
+      font-size: 1.2rem;
+      color: #E67E22;
+      font-weight: bold;
+      margin-bottom: 28px;
+      word-break: keep-all;
+    }
+
+    .reset-btn {
+      background-color: var(--accent-orange);
+      color: white;
+      border: none;
+      border-radius: 18px;
+      padding: 16px 36px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      box-shadow: 0 4px 12px rgba(255, 159, 67, 0.3);
+    }
+
+    .reset-btn:hover {
+      background-color: #E67E22;
+      transform: scale(1.03);
+    }
+
+    /* 모바일 대응 반응형 디자인 */
+    @media (max-width: 480px) {
+      .container {
+        padding: 24px 16px;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+      }
+
+      .subtitle {
+        font-size: 1rem;
+      }
+
+      .mbti-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .mbti-btn {
+        padding: 14px 4px;
+        font-size: 1.1rem;
+      }
+
+      .pokemon-emoji {
+        font-size: 5.5rem;
+      }
+
+      .pokemon-name {
+        font-size: 1.8rem;
+      }
+
+      .reason-box, .match-box {
+        font-size: 1.05rem;
+      }
+
+      .reset-btn {
+        width: 100%;
+        padding: 14px;
+        font-size: 1.15rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 메인 선택 화면 -->
+    <div id="selection-screen">
+      <h1>⚡ MBTI로 포켓몬 찾기 ⚡</h1>
+      <p class="subtitle">당신의 MBTI를 누르면 나와 꼭 닮은 포켓몬을 알려드려요!</p>
+      
+      <div class="mbti-grid" id="mbti-grid">
+        <!-- 자바스크립트로 버튼이 자동 생성됩니다 -->
+      </div>
+    </div>
+
+    <!-- 결과 화면 -->
+    <div id="result-screen" class="result-card">
+      <div class="mbti-badge" id="res-mbti">MBTI</div>
+      <div class="pokemon-emoji" id="res-emoji">❓</div>
+      <div class="pokemon-name" id="res-name">포켓몬 이름</div>
+      
+      <div class="reason-box" id="res-reason">
+        어울리는 이유가 들어가는 공간입니다.
+      </div>
+
+      <div class="match-box" id="res-match">
+        ❤️ 환상의 짝꿍 MBTI: -
+      </div>
+
+      <button class="reset-btn" onclick="showSelection()">🔄 다시 고르기</button>
+    </div>
+  </div>
+
+  <script>
+    // 16가지 MBTI 데이터 설정
+    const pokemonData = {
+      "ISTJ": {
+        name: "거북왕",
+        emoji: "🐢",
+        reason: "책임감이 매우 강하며 안정적이고 규칙을 잘 지킵니다.\n단단한 껍질처럼 든든하고 신뢰할 수 있으며, 맡은 일을 끝까지 성실하게 완수해냅니다.",
+        match: "ESFP (열정적이고 유쾌한 흥부자)"
+      },
+      "ISFJ": {
+        name: "해피너스",
+        emoji: "🥚",
+        reason: "주변 사람들을 온화하고 따뜻하게 챙기는 최고의 수호자입니다.\n상대방의 감정을 잘 살피며, 다정다감한 마음으로 묵묵히 헌신합니다.",
+        match: "ESTP (모험을 즐기는 에너자이저)"
+      },
+      "INFJ": {
+        name: "뮤",
+        emoji: "✨",
+        reason: "조용하지만 깊은 통찰력과 신비로운 매력을 가지고 있습니다.\n타인의 마음을 잘 이해하며, 자신만의 확고한 신념과 이상을 지켜나갑니다.",
+        match: "ENFP (아이디어가 넘치는 분위기 메이커)"
+      },
+      "INTJ": {
+        name: "뮤츠",
+        emoji: "🧬",
+        reason: "철두철미한 전략가이며 혼자서도 완벽하게 문제를 해결합니다.\n비전이 명확하고 논리적이며, 더 높은 목표를 위해 끊임없이 탐구합니다.",
+        match: "ENTP (독창적이고 호기심 많은 토론가)"
+      },
+      "ISTP": {
+        name: "루카리오",
+        emoji: "🐺",
+        reason: "침착하고 냉철하며 손재주와 상황 판단력이 뛰어납니다.\n말보다는 행동으로 보여주며, 위기 상황에서도 흔들리지 않는 해결사입니다.",
+        match: "ESFJ (친절하고 배려심 넘치는 분위기 리더)"
+      },
+      "ISFP": {
+        name: "메타몽",
+        emoji: "DA",
+        reason: "유연하고 온순하며 어떤 환경에도 자연스럽게 스며듭니다.\n예술적인 감각을 가졌으며, 타인을 압박하지 않는 유쾌하고 편안한 존재입니다.",
+        match: "ENTJ (당차고 리더십 있는 결단주의자)"
+      },
+      "INFP": {
+        name: "이브이",
+        emoji: "🦊",
+        reason: "무한한 가능성과 풍부한 상상력을 가지고 있습니다.\n따뜻한 마음씨를 가졌으며, 자신만의 독특하고 아기자기한 색깔을 피워냅니다.",
+        match: "ENFJ (따뜻하고 열정적인 지도자)"
+      },
+      "INTP": {
+        name: "후딘",
+        emoji: "🥄",
+        reason: "호기심이 넘치고 지적인 분석을 즐기는 천재형입니다.\n원리와 규칙을 탐구하는 것을 좋아하며, 복잡한 문제도 명쾌하게 해결합니다.",
+        match: "ENTJ (비전이 확실하고 추진력 있는 리더)"
+      },
+      "ESTP": {
+        name: "피카츄",
+        emoji: "⚡",
+        reason: "에너지가 넘치고 순발력이 뛰어나며 어디서나 주목받습니다.\n새로운 도전을 두려워하지 않고 순간의 즐거움을 100% 즐길 줄 압니다.",
+        match: "ISFJ (다정하고 든든하게 챙겨주는 수호자)"
+      },
+      "ESFP": {
+        name: "푸린",
+        emoji: "🎤",
+        reason: "사람들에게 즐거움을 주는 통통 튀는 스타 체질입니다.\n솔직하고 밝은 성격으로 주변 사람들을 언제나 미소 짓게 만들어 줍니다.",
+        match: "ISTJ (차분하고 성실한 든든한 조력자)"
+      },
+      "ENFP": {
+        name: "망나뇽",
+        emoji: "🐉",
+        reason: "상냥하고 친근하며 창의적인 에너지로 가득 차 있습니다.\n새로운 사람과 경험을 좋아하며, 특유의 긍정 기운으로 모험을 떠납니다.",
+        match: "INTJ (지적이고 방향을 잡아주는 전략가)"
+      },
+      "ENTP": {
+        name: "팬텀",
+        emoji: "👻",
+        reason: "장난기 가득하고 창의적이며 독창적인 아이디어가 샘솟습니다.\n기존의 틀에 갇히지 않고 새로운 관점으로 세상을 바라보는 재미있는 친구입니다.",
+        match: "INFJ (깊은 속마음을 잘 들어주는 통찰가)"
+      },
+      "ESTJ": {
+        name: "윈디",
+        emoji: "🦁",
+        reason: "당당함과 리더십을 겸비하여 체계적으로 일을 이끌어갑니다.\n약속과 신의를 중요하게 생각하며, 주위 사람들을 든든하게 지켜줍니다.",
+        match: "ISFP (온화하고 유연한 마음을 가진 친구)"
+      },
+      "ESFJ": {
+        name: "라이츄",
+        emoji: "🐭",
+        reason: "친절하고 사교성이 좋아 누구와도 금방 친해집니다.\n모임의 분위기를 따뜻하게 만들고, 남들을 챙기는 데서 행복을 느낍니다.",
+        match: "ISTP (쿨하고 현실적인 문제 해결사)"
+      },
+      "ENFJ": {
+        name: "토게키스",
+        emoji: "🕊️",
+        reason: "주변 사람들에게 행복과 용기를 주는 따뜻한 리더입니다.\n공감 능력이 뛰어나며 모두가 잘되기를 바라는 포용력을 가지고 있습니다.",
+        match: "INFP (꿈 많고 따뜻한 감성가)"
+      },
+      "ENTJ": {
+        name: "리자몽",
+        emoji: "🔥",
+        reason: "열정적이고 목표 지향적이며 결단력이 뛰어납니다.\n어려운 난관이 찾아와도 뜨거운 열정으로 정면 돌파해 승리를 이끌어냅니다.",
+        match: "INTP (지혜롭고 새로운 시각을 가진 분석가)"
+      }
+    };
+
+    const mbtiList = Object.keys(pokemonData);
+
+    // MBTI 선택 버튼 생성
+    function initButtons() {
+      const grid = document.getElementById('mbti-grid');
+      mbtiList.forEach(mbti => {
+        const btn = document.createElement('button');
+        btn.className = 'mbti-btn';
+        btn.innerText = mbti;
+        btn.onclick = () => selectMBTI(mbti);
+        grid.appendChild(btn);
+      });
+    }
+
+    // MBTI 선택 시 결과 화면 전환
+    function selectMBTI(mbti) {
+      const data = pokemonData[mbti];
+
+      document.getElementById('res-mbti').innerText = mbti;
+      document.getElementById('res-emoji').innerText = data.emoji;
+      document.getElementById('res-name').innerText = data.name;
+      document.getElementById('res-reason').innerText = data.reason;
+      document.getElementById('res-match').innerText = `❤️ 환상의 짝꿍 MBTI: ${data.match}`;
+
+      document.getElementById('selection-screen').style.display = 'none';
+      document.getElementById('result-screen').style.display = 'block';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 다시 고르기 (선택 화면으로 이동)
+    function showSelection() {
+      document.getElementById('result-screen').style.display = 'none';
+      document.getElementById('selection-screen').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 페이지 로드 시 초기화
+    window.onload = initButtons;
+  </script>
+</body>
+</html>
